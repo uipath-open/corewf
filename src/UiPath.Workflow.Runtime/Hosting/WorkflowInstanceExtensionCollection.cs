@@ -118,7 +118,7 @@ internal class WorkflowInstanceExtensionCollection
                 {
                     if (!TypeHelper.ContainsCompatibleType(allExtensionTypes, requiredType))
                     {
-                        throw FxTrace.Exception.AsError(new ValidationException(SR.RequiredExtensionTypeNotFound(requiredType.ToString())));
+                        throw FxTrace.Exception.AsError(new ExtensionRequiredException(requiredType));
                     }
                 }
             }

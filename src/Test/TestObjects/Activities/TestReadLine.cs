@@ -229,4 +229,16 @@ namespace Test.Common.TestObjects.Activities
             traceGroup.Steps.Add(new UserTrace(WaitReadLine<T>.AfterWait));
         }
     }
+
+    public class MissingRequiredExtension<T> : NativeActivity
+    {
+        protected override void CacheMetadata(NativeActivityMetadata metadata)
+        {
+            metadata.RequireExtension(typeof(T));
+        }
+
+        protected override void Execute(NativeActivityContext context)
+        {
+        }
+    }
 }
