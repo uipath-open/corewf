@@ -5,7 +5,6 @@ using Shouldly;
 using System.Activities;
 using System.Activities.Statements;
 using System.Text;
-using Test.Common.TestObjects.Activities;
 using Xunit;
 
 namespace TestCases.Runtime
@@ -23,6 +22,18 @@ namespace TestCases.Runtime
 
             var ex = Assert.Throws<ExtensionRequiredException>(instance.Run);
             ex.RequiredExtensionType.ShouldBe(typeof(StringBuilder));
+        }
+
+        private class MissingRequiredExtension<T> : NativeActivity
+        {
+            protected override void CacheMetadata(NativeActivityMetadata metadata)
+            {
+                metadata.RequireExtension(typeof(T));
+            }
+
+            protected override void Execute(NativeActivityContext context)
+            {
+            }
         }
     }
 }
