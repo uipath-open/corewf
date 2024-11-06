@@ -6,29 +6,37 @@ namespace System.Activities;
 [Serializable]
 public class ExtensionRequiredException : Exception
 {
-    public Type RequiredExtensionType { get; }
+    private const string RequiredExtensionTypeName = "requiredExtensionType";
+
+    public string RequiredExtensionTypeFullName { get; }
 
     public ExtensionRequiredException(Type requiredType)
         : base()
     {
-        RequiredExtensionType = requiredType;
+        RequiredExtensionTypeFullName = requiredType.FullName;
     }
 
     public ExtensionRequiredException(Type requiredType, string message)
         : base(message)
     {
-        RequiredExtensionType = requiredType;
+        RequiredExtensionTypeFullName = requiredType.FullName;
     }
 
     public ExtensionRequiredException(Type requiredType, string message, Exception innerException)
         : base(message, innerException)
     {
-        RequiredExtensionType = requiredType;
+        RequiredExtensionTypeFullName = requiredType.FullName;
     }
 
-    public ExtensionRequiredException(Type requiredType, SerializationInfo info, StreamingContext context)
+    public ExtensionRequiredException(SerializationInfo info, StreamingContext context)
         : base(info, context)
     {
-        RequiredExtensionType = requiredType;
+        RequiredExtensionTypeFullName = info.GetString(RequiredExtensionTypeName);
+    }
+
+    public override void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+        base.GetObjectData(info, context);
+        info.AddValue(RequiredExtensionTypeName, RequiredExtensionTypeFullName, typeof(string));
     }
 }
