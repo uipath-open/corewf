@@ -3,12 +3,31 @@
 
 namespace System.Activities;
 
-public class ExtensionRequiredException : ValidationException
+[Serializable]
+public class ExtensionRequiredException : Exception
 {
-    public Type RequiredExtensionType { get; private set; }
+    public Type RequiredExtensionType { get; }
 
     public ExtensionRequiredException(Type requiredType)
-        : base(SR.RequiredExtensionTypeNotFound(requiredType.ToString()))
+        : base()
+    {
+        RequiredExtensionType = requiredType;
+    }
+
+    public ExtensionRequiredException(Type requiredType, string message)
+        : base(message)
+    {
+        RequiredExtensionType = requiredType;
+    }
+
+    public ExtensionRequiredException(Type requiredType, string message, Exception innerException)
+        : base(message, innerException)
+    {
+        RequiredExtensionType = requiredType;
+    }
+
+    public ExtensionRequiredException(Type requiredType, SerializationInfo info, StreamingContext context)
+        : base(info, context)
     {
         RequiredExtensionType = requiredType;
     }

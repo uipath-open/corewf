@@ -29,8 +29,9 @@ namespace TestCases.Runtime
             }
             else
             {
-                exception.ShouldBeOfType<ExtensionRequiredException>();
-                ((ExtensionRequiredException)exception).RequiredExtensionType.ShouldBe(typeof(StringBuilder));
+                exception.ShouldBeOfType<ValidationException>();
+                exception.InnerException.ShouldBeOfType<ExtensionRequiredException>();
+                ((ExtensionRequiredException)exception.InnerException).RequiredExtensionType.ShouldBe(typeof(StringBuilder));
             }
         }
 
