@@ -199,6 +199,53 @@ namespace TestCases.Workflows
             VisualBasicSettings.Default.CompilerFactory = references => new VbJitCompiler(references);
         }
 
+        [Theory]
+        [InlineData(null)]
+        [InlineData(typeof(object))]
+        public async Task VisualBasic_CompileAnonymousTypes(Type targetType)
+        {
+            SetupCompilation(out var location, out var namespaces, out var assemblyReferences);
+            string expressionText = "in_dt_OrderExport.AsEnumerable().Where(Function(row) row.Field(Of String)(\"Country\") = in_CountryName).GroupBy(Function(row) New With {Key .SKU = row.Field(Of String)(\"SKU\"), Key .ProductTitle = row.Field(Of String)(\"Product Title\")}).Select(Function(g) New With {Key .SKU = g.Key.SKU, Key .ProductTitle = g.Key.ProductTitle, Key .NetQTY = g.Sum(Function(row) row.Field(Of Decimal)(\"Net QTY\")), Key .SD = g.Sum(Function(row) row.Field(Of Decimal)(\"S-D\")), Key .Taxes = g.Sum(Function(row) row.Field(Of Decimal)(\"Taxes\"))})";
+
+            var compilationResult = await VisualBasicDesignerHelper.CreatePrecompiledValueAsync(targetType, expressionText, namespaces, assemblyReferences, location);
+
+            Assert.Equal(typeof(IEnumerable<object>), compilationResult.ReturnType);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData(typeof(object))]
+        public async Task CSharp_CompileAnonymousTypes(Type targetType)
+        {
+            SetupCompilation(out var location, out var namespaces, out var assemblyReferences);
+            string expressionText = "in_dt_OrderExport.AsEnumerable().Where(row => row.Field<String>(\"Country\") == in_CountryName).GroupBy(row => new { SKU = row.Field<String>(\"SKU\"), ProductTitle = row.Field<String>(\"Product Title\")}).Select(g => new{SKU = g.Key.SKU,ProductTitle = g.Key.ProductTitle,NetQTY = g.Sum(row => row.Field<Decimal>(\"Net QTY\")),SD = g.Sum(row => row.Field<Decimal>(\"S-D\")),Taxes = g.Sum(row => row.Field<Decimal>(\"Taxes\"))})";
+
+            var compilationResult = await CSharpDesignerHelper.CreatePrecompiledValueAsync(targetType, expressionText, namespaces, assemblyReferences, location);
+
+            Assert.Equal(typeof(IEnumerable<object>), compilationResult.ReturnType);
+        }
+
+        private static void SetupCompilation(out ActivityLocationReferenceEnvironment location, out string[] namespaces, out AssemblyReference[] assemblyReferences)
+        {
+            var seq = new Sequence();
+            IList<ValidationError> errors = [];
+            location = new ActivityLocationReferenceEnvironment();
+            WorkflowInspectionServices.CacheMetadata(seq, location);
+            location.Declare(new Variable<string>("in_CountryName"), seq, ref errors);
+            location.Declare(new Variable<DataTable>("in_dt_OrderExport"), seq, ref errors);
+            namespaces = ["System", "System.Linq", "System.Data"];
+            assemblyReferences = 
+            [
+                new AssemblyReference() { Assembly = typeof(string).Assembly }, 
+                new AssemblyReference() { Assembly = typeof(DataTable).Assembly }, 
+                new AssemblyReference() { Assembly = typeof(Enumerable).Assembly }, 
+                new AssemblyReference() { Assembly = typeof(System.ComponentModel.TypeConverter).Assembly }, 
+                new AssemblyReference() { Assembly = typeof(IServiceProvider).Assembly }, 
+                new AssemblyReference() { Assembly = Assembly.Load("System.Xml.ReaderWriter") },
+                new AssemblyReference() { Assembly = Assembly.Load("System.Private.Xml") }
+            ];
+        }
+
         private class ThrowingJitCompiler : JustInTimeCompiler
         {
             public override LambdaExpression CompileExpression(ExpressionToCompile compilerRequest) => throw new NotImplementedException();
