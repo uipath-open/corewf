@@ -12,13 +12,15 @@ public sealed class BookmarkInfo
     private string _bookmarkName;
     private BookmarkScopeInfo _scopeInfo;
     private string _ownerDisplayName;
+    private Activity _owner;
 
     internal BookmarkInfo() { }
-    internal BookmarkInfo(string bookmarkName, string ownerDisplayName, BookmarkScopeInfo scopeInfo)
+    internal BookmarkInfo(string bookmarkName, string ownerDisplayName, BookmarkScopeInfo scopeInfo, Activity owner)
     {
         BookmarkName = bookmarkName;
         OwnerDisplayName = ownerDisplayName;
         ScopeInfo = scopeInfo;
+        _owner = owner;
     }
 
     public string BookmarkName
@@ -37,6 +39,12 @@ public sealed class BookmarkInfo
     {
         get => _scopeInfo;
         private set => _scopeInfo = value;
+    }
+
+    public Activity Owner 
+    { 
+        get => _owner;
+        set => _owner = value;
     }
 
     [DataMember(Name = "BookmarkName")]

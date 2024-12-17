@@ -110,7 +110,7 @@ public class Bookmark : IEquatable<Bookmark>
             scopeInfo = Scope.GenerateScopeInfo();
         }
 
-        return new BookmarkInfo(_externalName, bookmarkCallback.ActivityInstance.Activity.DisplayName, scopeInfo);
+        return new BookmarkInfo(_externalName, bookmarkCallback.ActivityInstance.Activity.DisplayName, scopeInfo, bookmarkCallback.ActivityInstance.Activity);
     }
 
     public bool Equals(Bookmark other)
