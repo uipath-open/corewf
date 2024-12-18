@@ -385,7 +385,6 @@ public class WorflowInstanceResumeBookmarkAsyncTests
         TestWorkflowRuntime workflowRuntime = TestRuntime.CreateTestWorkflowRuntime(testSequence, null, jsonStore, PersistableIdleAction.Unload);
         workflowRuntime.ExecuteWorkflow();
         workflowRuntime.PersistWorkflow();
-        //workflowRuntime.WaitForCompletion();
         workflowRuntime.LoadWorkflow();
         workflowRuntime.ResumeWorkflow();
         workflowRuntime.WaitForCompletion(false);
@@ -407,13 +406,14 @@ public class WorflowInstanceResumeBookmarkAsyncTests
         };
         WorkflowApplicationTestExtensions.Persistence.FileInstanceStore jsonStore = new WorkflowApplicationTestExtensions.Persistence.FileInstanceStore(".\\~");
         TestWorkflowRuntime workflowRuntime = TestRuntime.CreateTestWorkflowRuntime(testSequence, null, jsonStore, PersistableIdleAction.Unload);
+        workflowRuntime.OnWorkflowIdle += (_, __) => throw new Exception("Should not idle");
         workflowRuntime.OnWorkflowUnloaded += (_, __) => throw new Exception("Should not unload");
         workflowRuntime.ExecuteWorkflow();
         workflowRuntime.WaitForCompletion();
     }
 
     [Fact]
-    public static void TestBookmarkShouldNotUnloadWithParallelDelay()
+    public static void TestBookmarkWithParallelDelayShouldNotUnloadWorkflow()
     {
         var testSequence = new TestSequence()
         {
@@ -434,6 +434,7 @@ public class WorflowInstanceResumeBookmarkAsyncTests
         };
         WorkflowApplicationTestExtensions.Persistence.FileInstanceStore jsonStore = new WorkflowApplicationTestExtensions.Persistence.FileInstanceStore(".\\~");
         TestWorkflowRuntime workflowRuntime = TestRuntime.CreateTestWorkflowRuntime(testSequence, null, jsonStore, PersistableIdleAction.Unload);
+        workflowRuntime.OnWorkflowIdle += (_, __) => throw new Exception("Should not idle");
         workflowRuntime.OnWorkflowUnloaded += (_, __) => throw new Exception("Should not unload");
         workflowRuntime.ExecuteWorkflow();
         workflowRuntime.ResumeBookMark("B", null);
