@@ -11,6 +11,7 @@ using Test.Common.TestObjects.Runtime;
 using Test.Common.TestObjects.Utilities;
 using Test.Common.TestObjects.Utilities.Validation;
 using TestCases.Runtime.Common.Activities;
+using UiPath.Workflow.Runtime.Statements;
 using WorkflowApplicationTestExtensions.Persistence;
 using Xunit;
 namespace TestCases.Runtime.WorkflowInstanceTest;
@@ -385,6 +386,7 @@ public class WorflowInstanceResumeBookmarkAsyncTests
         TestWorkflowRuntime workflowRuntime = TestRuntime.CreateTestWorkflowRuntime(testSequence, null, jsonStore, PersistableIdleAction.Unload);
         workflowRuntime.ExecuteWorkflow();
         workflowRuntime.PersistWorkflow();
+        workflowRuntime.WaitForUnloaded();
         workflowRuntime.LoadWorkflow();
         workflowRuntime.ResumeWorkflow();
         workflowRuntime.WaitForCompletion(false);
@@ -392,7 +394,7 @@ public class WorflowInstanceResumeBookmarkAsyncTests
 
 
     [Fact]
-    public static void TestDelayShouldNotUnload()
+    public static void TestBlockingDelayShouldNotUnload()
     {
         var testSequence = new TestSequence()
         {
@@ -406,9 +408,11 @@ public class WorflowInstanceResumeBookmarkAsyncTests
         };
         WorkflowApplicationTestExtensions.Persistence.FileInstanceStore jsonStore = new WorkflowApplicationTestExtensions.Persistence.FileInstanceStore(".\\~");
         TestWorkflowRuntime workflowRuntime = TestRuntime.CreateTestWorkflowRuntime(testSequence, null, jsonStore, PersistableIdleAction.Unload);
+        workflowRuntime.CreateWorkflow();
+        workflowRuntime.Extensions.Add(new WorkflowSettingsExtension { BlockingDelay = true });
         workflowRuntime.OnWorkflowIdleAndPersistable += (_, __) => throw new Exception("Should not idle");
         workflowRuntime.OnWorkflowUnloaded += (_, __) => throw new Exception("Should not unload");
-        workflowRuntime.ExecuteWorkflow();
+        workflowRuntime.ResumeWorkflow();
         workflowRuntime.WaitForCompletion();
     }
 
@@ -434,9 +438,11 @@ public class WorflowInstanceResumeBookmarkAsyncTests
         };
         WorkflowApplicationTestExtensions.Persistence.FileInstanceStore jsonStore = new WorkflowApplicationTestExtensions.Persistence.FileInstanceStore(".\\~");
         TestWorkflowRuntime workflowRuntime = TestRuntime.CreateTestWorkflowRuntime(testSequence, null, jsonStore, PersistableIdleAction.Unload);
+        workflowRuntime.CreateWorkflow();
+        workflowRuntime.Extensions.Add(new WorkflowSettingsExtension { BlockingDelay = true });
         workflowRuntime.OnWorkflowIdleAndPersistable += (_, __) => throw new Exception("Should not idle");
         workflowRuntime.OnWorkflowUnloaded += (_, __) => throw new Exception("Should not unload");
-        workflowRuntime.ExecuteWorkflow();
+        workflowRuntime.ResumeWorkflow();
         workflowRuntime.ResumeBookMark("B", null);
         workflowRuntime.WaitForCompletion();
     }

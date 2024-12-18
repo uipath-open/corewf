@@ -4,6 +4,7 @@
 using System.Activities.Runtime;
 using System.Collections.ObjectModel;
 using System.Windows.Markup;
+using UiPath.Workflow.Runtime.Statements;
 
 namespace System.Activities.Statements;
 
@@ -55,7 +56,8 @@ public sealed class Delay : NativeActivity
 
         TimerExtension timerExtension = GetTimerExtension(context);
 
-        _noPersistHandle.Get(context).Enter(context);
+        if (HasBlockingDelay(context))
+            _noPersistHandle.Get(context).Enter(context);
 
         Bookmark bookmark = context.CreateBookmark();
         timerExtension.RegisterTimer(duration, bookmark);
@@ -70,7 +72,8 @@ public sealed class Delay : NativeActivity
         context.RemoveBookmark(timerBookmark);
         context.MarkCanceled();
 
-        _noPersistHandle.Get(context).Exit(context);
+        if (HasBlockingDelay(context))
+            _noPersistHandle.Get(context).Exit(context);
     }
 
     protected override void Abort(NativeActivityAbortContext context)
@@ -90,5 +93,10 @@ public sealed class Delay : NativeActivity
         TimerExtension timerExtension = context.GetExtension<TimerExtension>();
         Fx.Assert(timerExtension != null, "TimerExtension must exist.");
         return timerExtension;
+    }
+
+    private bool HasBlockingDelay(NativeActivityContext context)
+    {
+        return context.GetExtension<WorkflowSettingsExtension>()?.BlockingDelay == true;
     }
 }
