@@ -384,8 +384,8 @@ public class WorflowInstanceResumeBookmarkAsyncTests
         };
         WorkflowApplicationTestExtensions.Persistence.FileInstanceStore jsonStore = new WorkflowApplicationTestExtensions.Persistence.FileInstanceStore(".\\~");
         TestWorkflowRuntime workflowRuntime = TestRuntime.CreateTestWorkflowRuntime(testSequence, null, jsonStore, PersistableIdleAction.Unload);
+        workflowRuntime.OnWorkflowIdleAndPersistable += (_, __) => workflowRuntime.PersistWorkflow();
         workflowRuntime.ExecuteWorkflow();
-        workflowRuntime.PersistWorkflow();
         workflowRuntime.WaitForUnloaded();
         workflowRuntime.LoadWorkflow();
         workflowRuntime.ResumeWorkflow();
