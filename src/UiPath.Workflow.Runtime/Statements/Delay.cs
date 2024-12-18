@@ -57,7 +57,7 @@ public sealed class Delay : NativeActivity
 
         _noPersistHandle.Get(context).Enter(context);
 
-        Bookmark bookmark = context.CreateBookmark(OnTimerFired);
+        Bookmark bookmark = context.CreateBookmark();
         timerExtension.RegisterTimer(duration, bookmark);
         _timerBookmark.Set(context, bookmark);
     }
@@ -83,16 +83,6 @@ public sealed class Delay : NativeActivity
             timerExtension.CancelTimer(timerBookmark);
         }
         base.Abort(context);
-    }
-
-    private void OnTimerFired(NativeActivityContext context, Bookmark bookmark, object value)
-    {
-        // Timer has fired, now we can exit the NoPersistHandle to allow persistence again
-        NoPersistHandle handle = _noPersistHandle.Get(context);
-        if (handle != null)
-        {
-            handle.Exit(context);
-        }
     }
 
     private TimerExtension GetTimerExtension(ActivityContext context)
