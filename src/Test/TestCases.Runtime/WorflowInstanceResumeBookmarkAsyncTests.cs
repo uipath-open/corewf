@@ -385,11 +385,61 @@ public class WorflowInstanceResumeBookmarkAsyncTests
         TestWorkflowRuntime workflowRuntime = TestRuntime.CreateTestWorkflowRuntime(testSequence, null, jsonStore, PersistableIdleAction.Unload);
         workflowRuntime.ExecuteWorkflow();
         workflowRuntime.PersistWorkflow();
-        workflowRuntime.WaitForUnloaded();
+        //workflowRuntime.WaitForCompletion();
         workflowRuntime.LoadWorkflow();
         workflowRuntime.ResumeWorkflow();
         workflowRuntime.WaitForCompletion(false);
     }
+
+
+    [Fact]
+    public static void TestDelayShouldNotUnload()
+    {
+        var testSequence = new TestSequence()
+        {
+            Activities =
+            {
+                new TestDelay()
+                {
+                    Duration = TimeSpan.FromMilliseconds(100)
+                },
+            }
+        };
+        WorkflowApplicationTestExtensions.Persistence.FileInstanceStore jsonStore = new WorkflowApplicationTestExtensions.Persistence.FileInstanceStore(".\\~");
+        TestWorkflowRuntime workflowRuntime = TestRuntime.CreateTestWorkflowRuntime(testSequence, null, jsonStore, PersistableIdleAction.Unload);
+        workflowRuntime.OnWorkflowUnloaded += (_, __) => throw new Exception("Should not unload");
+        workflowRuntime.ExecuteWorkflow();
+        workflowRuntime.WaitForCompletion();
+    }
+
+    [Fact]
+    public static void TestBookmarkShouldNotUnloadWithParallelDelay()
+    {
+        var testSequence = new TestSequence()
+        {
+            Activities =
+            {
+                new TestParallel()
+                {
+                    Branches =
+                    {
+                        new TestDelay()
+                        {
+                            Duration = TimeSpan.FromMilliseconds(100)
+                        },
+                        new TestBlockingActivity("B")
+                    }
+                },
+            }
+        };
+        WorkflowApplicationTestExtensions.Persistence.FileInstanceStore jsonStore = new WorkflowApplicationTestExtensions.Persistence.FileInstanceStore(".\\~");
+        TestWorkflowRuntime workflowRuntime = TestRuntime.CreateTestWorkflowRuntime(testSequence, null, jsonStore, PersistableIdleAction.Unload);
+        workflowRuntime.OnWorkflowUnloaded += (_, __) => throw new Exception("Should not unload");
+        workflowRuntime.ExecuteWorkflow();
+        workflowRuntime.ResumeBookMark("B", null);
+        workflowRuntime.WaitForCompletion();
+    }
+
     [Fact]
     public static void TestNoPersistSerialization()
     {

@@ -12,6 +12,8 @@ public sealed class Delay : NativeActivity
 {
     private static readonly Func<TimerExtension> getDefaultTimerExtension = new Func<TimerExtension>(GetDefaultTimerExtension);
     private readonly Variable<Bookmark> _timerBookmark;
+    private readonly Variable<NoPersistHandle> _noPersistHandle = new Variable<NoPersistHandle>();
+
 
     public Delay()
         : base()
@@ -23,6 +25,7 @@ public sealed class Delay : NativeActivity
     [DefaultValue(null)]
     public InArgument<TimeSpan> Duration { get; set; }
 
+
     protected override bool CanInduceIdle => true;
 
     protected override void CacheMetadata(NativeActivityMetadata metadata)
@@ -31,6 +34,7 @@ public sealed class Delay : NativeActivity
         metadata.Bind(Duration, durationArgument);
         metadata.SetArgumentsCollection(new Collection<RuntimeArgument> { durationArgument });
         metadata.AddImplementationVariable(_timerBookmark);
+        metadata.AddImplementationVariable(_noPersistHandle);
         metadata.AddDefaultExtensionProvider(getDefaultTimerExtension);
     }
 
@@ -50,7 +54,10 @@ public sealed class Delay : NativeActivity
         }
 
         TimerExtension timerExtension = GetTimerExtension(context);
-        Bookmark bookmark = context.CreateBookmark();
+
+        _noPersistHandle.Get(context).Enter(context);
+
+        Bookmark bookmark = context.CreateBookmark(OnTimerFired);
         timerExtension.RegisterTimer(duration, bookmark);
         _timerBookmark.Set(context, bookmark);
     }
@@ -62,6 +69,8 @@ public sealed class Delay : NativeActivity
         timerExtension.CancelTimer(timerBookmark);
         context.RemoveBookmark(timerBookmark);
         context.MarkCanceled();
+
+        _noPersistHandle.Get(context).Exit(context);
     }
 
     protected override void Abort(NativeActivityAbortContext context)
@@ -74,6 +83,16 @@ public sealed class Delay : NativeActivity
             timerExtension.CancelTimer(timerBookmark);
         }
         base.Abort(context);
+    }
+
+    private void OnTimerFired(NativeActivityContext context, Bookmark bookmark, object value)
+    {
+        // Timer has fired, now we can exit the NoPersistHandle to allow persistence again
+        NoPersistHandle handle = _noPersistHandle.Get(context);
+        if (handle != null)
+        {
+            handle.Exit(context);
+        }
     }
 
     private TimerExtension GetTimerExtension(ActivityContext context)
