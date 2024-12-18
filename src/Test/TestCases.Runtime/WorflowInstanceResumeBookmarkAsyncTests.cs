@@ -406,7 +406,7 @@ public class WorflowInstanceResumeBookmarkAsyncTests
         };
         WorkflowApplicationTestExtensions.Persistence.FileInstanceStore jsonStore = new WorkflowApplicationTestExtensions.Persistence.FileInstanceStore(".\\~");
         TestWorkflowRuntime workflowRuntime = TestRuntime.CreateTestWorkflowRuntime(testSequence, null, jsonStore, PersistableIdleAction.Unload);
-        workflowRuntime.OnWorkflowIdle += (_, __) => throw new Exception("Should not idle");
+        workflowRuntime.OnWorkflowIdleAndPersistable += (_, __) => throw new Exception("Should not idle");
         workflowRuntime.OnWorkflowUnloaded += (_, __) => throw new Exception("Should not unload");
         workflowRuntime.ExecuteWorkflow();
         workflowRuntime.WaitForCompletion();
@@ -434,7 +434,7 @@ public class WorflowInstanceResumeBookmarkAsyncTests
         };
         WorkflowApplicationTestExtensions.Persistence.FileInstanceStore jsonStore = new WorkflowApplicationTestExtensions.Persistence.FileInstanceStore(".\\~");
         TestWorkflowRuntime workflowRuntime = TestRuntime.CreateTestWorkflowRuntime(testSequence, null, jsonStore, PersistableIdleAction.Unload);
-        workflowRuntime.OnWorkflowIdle += (_, __) => throw new Exception("Should not idle");
+        workflowRuntime.OnWorkflowIdleAndPersistable += (_, __) => throw new Exception("Should not idle");
         workflowRuntime.OnWorkflowUnloaded += (_, __) => throw new Exception("Should not unload");
         workflowRuntime.ExecuteWorkflow();
         workflowRuntime.ResumeBookMark("B", null);
