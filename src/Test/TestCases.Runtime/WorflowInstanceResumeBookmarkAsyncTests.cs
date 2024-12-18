@@ -409,7 +409,7 @@ public class WorflowInstanceResumeBookmarkAsyncTests
         WorkflowApplicationTestExtensions.Persistence.FileInstanceStore jsonStore = new WorkflowApplicationTestExtensions.Persistence.FileInstanceStore(".\\~");
         TestWorkflowRuntime workflowRuntime = TestRuntime.CreateTestWorkflowRuntime(testSequence, null, jsonStore, PersistableIdleAction.Unload);
         workflowRuntime.CreateWorkflow();
-        workflowRuntime.Extensions.Add(new WorkflowSettingsExtension { BlockingDelay = true });
+        workflowRuntime.Extensions.Add(new StatementsBehaviorExtension { BlockingDelay = true });
         workflowRuntime.OnWorkflowIdleAndPersistable += (_, __) => throw new Exception("Should not idle");
         workflowRuntime.OnWorkflowUnloaded += (_, __) => throw new Exception("Should not unload");
         workflowRuntime.ResumeWorkflow();
@@ -439,7 +439,7 @@ public class WorflowInstanceResumeBookmarkAsyncTests
         WorkflowApplicationTestExtensions.Persistence.FileInstanceStore jsonStore = new WorkflowApplicationTestExtensions.Persistence.FileInstanceStore(".\\~");
         TestWorkflowRuntime workflowRuntime = TestRuntime.CreateTestWorkflowRuntime(testSequence, null, jsonStore, PersistableIdleAction.Unload);
         workflowRuntime.CreateWorkflow();
-        workflowRuntime.Extensions.Add(new WorkflowSettingsExtension { BlockingDelay = true });
+        workflowRuntime.Extensions.Add(new StatementsBehaviorExtension { BlockingDelay = true });
         workflowRuntime.OnWorkflowIdleAndPersistable += (_, __) => throw new Exception("Should not idle");
         workflowRuntime.OnWorkflowUnloaded += (_, __) => throw new Exception("Should not unload");
         workflowRuntime.ResumeWorkflow();

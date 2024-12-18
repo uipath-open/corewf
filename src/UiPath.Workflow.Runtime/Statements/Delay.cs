@@ -97,6 +97,6 @@ public sealed class Delay : NativeActivity
 
     private bool HasBlockingDelay(NativeActivityContext context)
     {
-        return context.GetExtension<WorkflowSettingsExtension>()?.BlockingDelay == true;
+        return context.GetExtension<StatementsBehaviorExtension>()?.BlockingDelay == true;
     }
 }

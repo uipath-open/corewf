@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace UiPath.Workflow.Runtime.Statements
 {
-    public class WorkflowSettingsExtension
+    /// <summary>
+    /// An extension that configures/changes the behavior of some statements like Delay.
+    /// </summary>
+    public class StatementsBehaviorExtension
     {
         /// <summary>
         /// When true, the delay activity will block the persistance idle event until the delay is over, 
