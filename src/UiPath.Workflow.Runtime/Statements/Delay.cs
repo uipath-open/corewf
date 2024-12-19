@@ -71,9 +71,6 @@ public sealed class Delay : NativeActivity
         timerExtension.CancelTimer(timerBookmark);
         context.RemoveBookmark(timerBookmark);
         context.MarkCanceled();
-
-        if (HasBlockingDelay(context))
-            _noPersistHandle.Get(context).Exit(context);
     }
 
     protected override void Abort(NativeActivityAbortContext context)
