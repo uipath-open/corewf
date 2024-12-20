@@ -377,7 +377,7 @@ public class WorflowInstanceResumeBookmarkAsyncTests
             {
                 new TestDelay()
                 {
-                    Duration = TimeSpan.FromMilliseconds(100)
+                    Duration = TimeSpan.FromMilliseconds(200)
                 },
             }
         };
