@@ -1,11 +1,12 @@
 <Project>
     <PropertyGroup>
         <Version>6.0.0</Version>
-        <RoslynPackageVersion>4.5.0-2.22527.10</RoslynPackageVersion>
+        <RoslynPackageVersion>4.12.0</RoslynPackageVersion>
+        <!--<RoslynPackageVersion>4.5.0-2.22527.10</RoslynPackageVersion>-->
         <WarningsAsErrors>true</WarningsAsErrors>
-        <UseWPF Condition="$(TargetFramework) == 'net6.0-windows'">true</UseWPF>
+        <UseWPF Condition="$(TargetFramework) == 'net8.0-windows'">true</UseWPF>
     </PropertyGroup>
-    <ItemGroup Condition="$(AssemblyName) != 'System.Xaml' AND $(TargetFramework) != 'net6.0-windows'">
+    <ItemGroup Condition="$(AssemblyName) != 'System.Xaml' AND $(TargetFramework) != 'net8.0-windows'">
         <ProjectReference Include="$(SolutionDir)\System.Xaml\System.Xaml.csproj" PrivateAssets="All"/>
     </ItemGroup>
 </Project>

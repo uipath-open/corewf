@@ -212,6 +212,17 @@ namespace TestCases.Workflows
             Assert.Equal(typeof(IEnumerable<object>), compilationResult.ReturnType);
         }
 
+        [Fact]
+        public async Task VisualBasic_SupportRefStructs()
+        {
+            SetupCompilation(out var location, out var namespaces, out var assemblyReferences);
+            string expressionText = "System.Security.Cryptography.RSA.Create().ImportFromPem(\"testing\")";
+
+            var compilationResult = await VisualBasicDesignerHelper.CreatePrecompiledValueAsync(typeof(string), expressionText, namespaces, assemblyReferences, location);
+
+            Assert.DoesNotContain("requires compiler feature 'RefStructs'", compilationResult.SourceExpressionException.Message);
+        }
+
         [Theory]
         [InlineData(null)]
         [InlineData(typeof(object))]
@@ -233,7 +244,7 @@ namespace TestCases.Workflows
             WorkflowInspectionServices.CacheMetadata(seq, location);
             location.Declare(new Variable<string>("in_CountryName"), seq, ref errors);
             location.Declare(new Variable<DataTable>("in_dt_OrderExport"), seq, ref errors);
-            namespaces = ["System", "System.Linq", "System.Data"];
+            namespaces = ["System", "System.Linq", "System.Data", "System.Security.Cryptography"];
             assemblyReferences = 
             [
                 new AssemblyReference() { Assembly = typeof(string).Assembly }, 
@@ -241,8 +252,10 @@ namespace TestCases.Workflows
                 new AssemblyReference() { Assembly = typeof(Enumerable).Assembly }, 
                 new AssemblyReference() { Assembly = typeof(System.ComponentModel.TypeConverter).Assembly }, 
                 new AssemblyReference() { Assembly = typeof(IServiceProvider).Assembly }, 
+                new AssemblyReference() { Assembly = Assembly.Load("System.Private.Xml") },
                 new AssemblyReference() { Assembly = Assembly.Load("System.Xml.ReaderWriter") },
-                new AssemblyReference() { Assembly = Assembly.Load("System.Private.Xml") }
+                new AssemblyReference() { Assembly = typeof(System.Security.Cryptography.RSA).Assembly },
+                new AssemblyReference() { Assembly = Assembly.Load("System.Security.Cryptography.Primitives") },
             ];
         }
 
