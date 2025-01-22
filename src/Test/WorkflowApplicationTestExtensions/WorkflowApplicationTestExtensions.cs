@@ -5,6 +5,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using StringToObject = System.Collections.Generic.IDictionary<string, object>;
+using System.Collections;
+using System.Activities.Hosting;
+using System.Collections.Generic;
 
 namespace WorkflowApplicationTestExtensions;
 
@@ -12,7 +15,7 @@ public static class WorkflowApplicationTestExtensions
 {
     public const string AutoResumedBookmarkNamePrefix = "AutoResumedBookmark_";
 
-    public record WorkflowApplicationResult(StringToObject Outputs, int PersistenceCount);
+    public record WorkflowApplicationResult(StringToObject Outputs, int PersistenceCount, IEnumerable<BookmarkInfo> PersistIdle, IEnumerable<BookmarkInfo> UnloadedBookmarks);
 
     /// <summary>
     /// Simple API to wait for the workflow to complete or propagate to the caller any error.
@@ -25,6 +28,8 @@ public static class WorkflowApplicationTestExtensions
         var applicationId = application.Id;
         var persistenceCount = 0;
         var output = new TaskCompletionSource<WorkflowApplicationResult>();
+        IEnumerable<BookmarkInfo> persistentBookmarks = null;
+        IEnumerable<BookmarkInfo> unloadedBookmarks = null;
         application.Completed += (WorkflowApplicationCompletedEventArgs args) =>
         {
             if (args.TerminationException is { } ex)
@@ -35,7 +40,7 @@ public static class WorkflowApplicationTestExtensions
             {
                 throw new OperationCanceledException("Workflow canceled.");
             }
-            output.TrySetResult(new(args.Outputs, persistenceCount));
+            output.TrySetResult(new(args.Outputs, persistenceCount, persistentBookmarks, unloadedBookmarks));
             application = null;
         };
 
@@ -56,7 +61,7 @@ public static class WorkflowApplicationTestExtensions
             if (application == null)
                 return;
             application.Load(applicationId);
-
+            unloadedBookmarks = application.GetBookmarks();
             foreach (var bookmark in application.GetBookmarks().Where(b => b.BookmarkName.StartsWith(AutoResumedBookmarkNamePrefix)))
             {
                 application.ResumeBookmark(new Bookmark(bookmark.BookmarkName), null);
@@ -67,6 +72,7 @@ public static class WorkflowApplicationTestExtensions
             Debug.WriteLine("PersistableIdle");
             try
             {
+                persistentBookmarks = args.Bookmarks;
                 if (++persistenceCount > 1000)
                 {
                     throw new Exception("Persisting too many times, aborting test.");
