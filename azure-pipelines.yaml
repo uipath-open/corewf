@@ -15,7 +15,7 @@ resources:
     - repository: templates
       type: github
       name: UiPath/AzurePipelinesTemplates
-      ref: refs/tags/uipath.package-signing.1.9.2
+      ref: refs/tags/uipath.package-signing.2.0.6
       endpoint: UiPath
 
 variables:
@@ -27,7 +27,7 @@ stages:
   - template: .pipelines/build.yaml
 
 - stage: ReleaseInternal
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+  # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
   dependsOn: BuildAndTest
   jobs:
   - template: .pipelines/release.yaml
