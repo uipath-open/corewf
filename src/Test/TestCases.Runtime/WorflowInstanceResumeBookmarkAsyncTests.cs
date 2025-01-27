@@ -1,8 +1,10 @@
+using Shouldly;
 using System;
 using System.Activities;
 using System.Activities.Statements;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading;
 using Test.Common.TestObjects.Activities;
 using Test.Common.TestObjects.Activities.Tracing;
@@ -11,6 +13,7 @@ using Test.Common.TestObjects.Runtime;
 using Test.Common.TestObjects.Utilities;
 using Test.Common.TestObjects.Utilities.Validation;
 using TestCases.Runtime.Common.Activities;
+using WorkflowApplicationTestExtensions;
 using WorkflowApplicationTestExtensions.Persistence;
 using Xunit;
 namespace TestCases.Runtime.WorkflowInstanceTest;
@@ -366,6 +369,26 @@ public class WorflowInstanceResumeBookmarkAsyncTests
         workflowRuntime.LoadWorkflow();
         workflowRuntime.ResumeBookMark("PersistBookmark", "Yes");
         workflowRuntime.WaitForCompletion(false);
+    }
+
+
+    [Fact]
+    public void SuspensionLeadsToBookmarkCreation()
+    {
+        var suspendingActivity = new SuspendingWrapper
+        {
+            Activities =
+                {
+                    new WriteLine(),
+                }
+        };
+        var app = new WorkflowApplication(suspendingActivity);
+        var result = app.RunUntilCompletion();
+        var bookmarkFromUnload = result.UnloadedBookmarks.Single();
+        var bookmarkFromPersistIdle = result.PersistIdle.Single();
+
+        bookmarkFromPersistIdle.Owner.ShouldBe(suspendingActivity);
+        bookmarkFromPersistIdle.BookmarkName.ShouldBe(bookmarkFromPersistIdle.BookmarkName);
     }
 
     [Fact]

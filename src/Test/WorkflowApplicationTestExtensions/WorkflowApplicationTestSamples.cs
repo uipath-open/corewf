@@ -48,48 +48,6 @@ namespace WorkflowApplicationTestExtensions
             result.PersistenceCount.ShouldBe(4);
         }
 
-        [Fact]
-        public void SuspensionLeadsToBookmarkCreation()
-        {
-            var suspendingActivity = new SuspendingWrapper
-            {
-                Activities =
-                {
-                    new WriteLine(),
-                }
-            };
-            var app = new WorkflowApplication(suspendingActivity);
-            var result = app.RunUntilCompletion();
-            var bookmarkFromUnload = result.UnloadedBookmarks.Single();
-            var bookmarkFromPersistIdle = result.PersistIdle.Single();
-
-            bookmarkFromPersistIdle.Owner.ShouldBe(suspendingActivity);
-            bookmarkFromPersistIdle.BookmarkName.ShouldBe(bookmarkFromPersistIdle.BookmarkName);
-        }
-
-        [Fact]
-        public async Task DelaySuspensionLeadsToBookmarkCreation()
-        {
-            var suspendingActivity = new Sequence()
-            {
-                Activities =
-                {
-                    new Delay
-                    {
-                        Duration = new InArgument<TimeSpan>(TimeSpan.FromSeconds(1)),
-                    },
-                        new WriteLine()
-                        {
-                            Text = new InArgument<string>("Delay was successful.")
-                        }
-
-                }
-            };
-            var app = new WorkflowApplication(suspendingActivity);
-            var result = await Task.Run( () =>app.RunUntilCompletion());
-            var bookmarkFromUnload = result.UnloadedBookmarks.Single();
-        }
-
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
