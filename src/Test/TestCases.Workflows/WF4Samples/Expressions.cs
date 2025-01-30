@@ -108,11 +108,25 @@ Iterate ArrayList
         }
 
 
-        sealed class DisabledJustInTimeCompiler : JustInTimeCompiler
+        sealed class JustInTimeCompilerWrapper : JustInTimeCompiler
         {
+            private JustInTimeCompiler _inner;
+            public JustInTimeCompilerWrapper(JustInTimeCompiler inner) { this._inner = inner; }
+
             public override LambdaExpression CompileExpression(ExpressionToCompile compilerRequest)
             {
-                throw new InvalidOperationException($"JIT compilation is disabled for non-Legacy projects. {compilerRequest} should have been compiled by the Studio Compiler.");
+                //Make sure to trigger exception only if called from the CompileSpecialCharacters test, since this is injected
+                //in the static VisualBasicSettings.Default.CompilerFactory that affects all tests.
+                var stackTrace = new System.Diagnostics.StackTrace();
+                var frames = stackTrace.GetFrames();
+
+                bool isCalledFromCompileSpecialCharacters =  frames?.Any(frame =>
+                    frame.GetMethod()?.Name.Equals("CompileSpecialCharacters", StringComparison.Ordinal) == true
+                ) ?? false;
+
+                if (isCalledFromCompileSpecialCharacters)
+                    throw new InvalidOperationException($"JIT compilation is disabled for non-Legacy projects. {compilerRequest} should have been compiled by the Studio Compiler.");
+                return _inner.CompileExpression(compilerRequest);
             }
         }
 
@@ -121,7 +135,7 @@ Iterate ArrayList
         public void CompileSpecialCharacters()
         {
             var cf = VisualBasicSettings.Default.CompilerFactory;
-            VisualBasicSettings.Default.CompilerFactory = _ => new DisabledJustInTimeCompiler();
+            VisualBasicSettings.Default.CompilerFactory = a => new JustInTimeCompilerWrapper(cf(a));
             var activity = Compile(TestXamls.SpecialCharacters);
             var result = TestHelper.InvokeWorkflow(activity);
             VisualBasicSettings.Default.CompilerFactory = cf;
