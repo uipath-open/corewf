@@ -106,6 +106,28 @@ Iterate ArrayList
             var activity = Compile(TestXamls.CSharpCalculation);
             TestHelper.InvokeWorkflow(activity, CSharpCalculationInputs).ShouldBe(CSharpCalculationResult);
         }
+
+
+        sealed class DisabledJustInTimeCompiler : JustInTimeCompiler
+        {
+            public override LambdaExpression CompileExpression(ExpressionToCompile compilerRequest)
+            {
+                throw new InvalidOperationException($"JIT compilation is disabled for non-Legacy projects. {compilerRequest} should have been compiled by the Studio Compiler.");
+            }
+        }
+
+        //https://uipath.atlassian.net/browse/ROBO-4469 Checks that an xaml WF with special characters can be compiled, and doesn't need JIT.
+        [Fact]
+        public void CompileSpecialCharacters()
+        {
+            var cf = VisualBasicSettings.Default.CompilerFactory;
+            VisualBasicSettings.Default.CompilerFactory = _ => new DisabledJustInTimeCompiler();
+            var activity = Compile(TestXamls.SpecialCharacters);
+            var result = TestHelper.InvokeWorkflow(activity);
+            VisualBasicSettings.Default.CompilerFactory = cf;
+        }
+
+
         [Fact]
         public void CSharpCalculation()
         {

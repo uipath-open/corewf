@@ -1,4 +1,4 @@
-// This file is part of Core WF which is licensed under the MIT license.
+﻿// This file is part of Core WF which is licensed under the MIT license.
 // See LICENSE file in the project root for full license information.
 
 using System.Activities.XamlIntegration;
@@ -192,8 +192,23 @@ public class CompiledExpressionInvoker
     private bool CanExecuteExpression(ICompiledExpressionRoot compiledExpressionRoot, out int expressionId)
     {
         var resultType = _expressionActivity.ResultType;
+
+        string normalizedExpressionText = _textExpression.ExpressionText;
+
+        if (compiledExpressionRoot.GetLanguage() == "VB")
+        {
+            //These characters are not allowed in VB code, so when VB compilation is done, they are replaced with normal quotes.
+            //But in the Expression Tree, we can have them, since they can be parsed directly from xaml code, or from a C# dll,
+            // so we need to "normalize" them, so that the comparison will work. 
+            normalizedExpressionText = normalizedExpressionText
+                .Replace('“', '"')
+                .Replace('”', '"')
+                .Replace('„', '"')
+                .Replace('‟', '"');
+        }
+
         return compiledExpressionRoot.CanExecuteExpression(_isReference ? resultType.GenericTypeArguments[0] : resultType,
-            _textExpression.ExpressionText, _isReference, _locationReferences, out expressionId); ;
+            normalizedExpressionText, _isReference, _locationReferences, out expressionId); ;
     }
 
     private void ProcessLocationReferences()

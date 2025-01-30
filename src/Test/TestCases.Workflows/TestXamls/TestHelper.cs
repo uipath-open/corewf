@@ -42,6 +42,7 @@ namespace TestCases.Workflows
         SimpleWorkflowWithArgsAndVar,
         IfThenElseBranchWithVars,
         NestedSequencesWithVars,
-        WorkflowWithReadonlyValueTypeVar
+        WorkflowWithReadonlyValueTypeVar,
+        SpecialCharacters
     }
 }
