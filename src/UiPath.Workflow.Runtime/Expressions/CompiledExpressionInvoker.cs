@@ -195,7 +195,7 @@ public class CompiledExpressionInvoker
 
         string normalizedExpressionText = _textExpression.ExpressionText;
 
-        if (compiledExpressionRoot.GetLanguage() == "VB")
+        if (_textExpression.Language == "VB")
         {
             //These characters are not allowed in VB code, so when VB compilation is done, they are replaced with normal quotes.
             //But in the Expression Tree, we can have them, since they can be parsed directly from xaml code, or from a C# dll,
