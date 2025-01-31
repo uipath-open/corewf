@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xaml;
 using TestCases.Workflows.TestUtils;
@@ -107,24 +108,24 @@ Iterate ArrayList
             TestHelper.InvokeWorkflow(activity, CSharpCalculationInputs).ShouldBe(CSharpCalculationResult);
         }
 
-
         sealed class CompileSpecialCharactersHelperCompiler : JustInTimeCompiler
         {
             private JustInTimeCompiler _inner;
+
+            private static ThreadLocal<bool> _threadLocalEnabled = new ThreadLocal<bool>(() => false);
+
+            public static bool EnabledOnCurrentThread
+            {
+                get => _threadLocalEnabled.Value;
+                set => _threadLocalEnabled.Value = value;
+            }
+
+
             public CompileSpecialCharactersHelperCompiler(JustInTimeCompiler inner) { this._inner = inner; }
 
             public override LambdaExpression CompileExpression(ExpressionToCompile compilerRequest)
             {
-                //Make sure to trigger exception only if called from the CompileSpecialCharacters test, since this is injected
-                //in the static VisualBasicSettings.Default.CompilerFactory that affects all tests.
-                var stackTrace = new System.Diagnostics.StackTrace();
-                var frames = stackTrace.GetFrames();
-
-                bool isCalledFromCompileSpecialCharacters =  frames?.Any(frame =>
-                    frame.GetMethod()?.Name.Equals("CompileSpecialCharacters", StringComparison.Ordinal) == true
-                ) ?? false;
-
-                if (isCalledFromCompileSpecialCharacters)
+                if (EnabledOnCurrentThread)
                     throw new InvalidOperationException($"JIT compilation is disabled for non-Legacy projects. {compilerRequest} should have been compiled by the Studio Compiler.");
                 return _inner.CompileExpression(compilerRequest);
             }
@@ -135,6 +136,7 @@ Iterate ArrayList
         public void CompileSpecialCharacters()
         {
             var cf = VisualBasicSettings.Default.CompilerFactory;
+            CompileSpecialCharactersHelperCompiler.EnabledOnCurrentThread = true;
             VisualBasicSettings.Default.CompilerFactory = a => new CompileSpecialCharactersHelperCompiler(cf(a));
             var activity = Compile(TestXamls.SpecialCharacters);
             var result = TestHelper.InvokeWorkflow(activity);
