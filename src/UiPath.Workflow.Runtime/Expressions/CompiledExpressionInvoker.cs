@@ -202,9 +202,7 @@ public class CompiledExpressionInvoker
             // so we need to "normalize" them, so that the comparison will work. 
             normalizedExpressionText = normalizedExpressionText
                 .Replace('“', '"')
-                .Replace('”', '"')
-                .Replace('„', '"')
-                .Replace('‟', '"');
+                .Replace('”', '"');
         }
 
         return compiledExpressionRoot.CanExecuteExpression(_isReference ? resultType.GenericTypeArguments[0] : resultType,

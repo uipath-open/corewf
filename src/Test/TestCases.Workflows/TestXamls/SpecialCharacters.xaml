@@ -79,9 +79,36 @@
   </TextExpression.ReferencesForImplementation>
   <Sequence DisplayName="Main Sequence" sap:VirtualizedContainerService.HintSize="874.4000000000001,606.84" sap2010:WorkflowViewState.IdRef="Sequence_1">
     <Sequence.Variables>
-      <Variable x:TypeArguments="x:String" Default="[“This works“]" Name="test" />
-	  <!--<Variable x:TypeArguments="x:String" Default="[&quot;This works&quot;]" Name="test" />-->
-	  <!--<Literal x:TypeArguments="x:String">This works</Literal>-->
+      
+      <!-- Different styles of variable declaration  -->	  
+      <Variable x:TypeArguments="x:String" Name="variable1">
+        <Variable.Default>
+          <VisualBasicValue x:TypeArguments="x:String" ExpressionText="&quot;SampleText1&lt;&quot;.ToLower()" />
+        </Variable.Default>
+      </Variable>
+      <Variable x:TypeArguments="x:String" Name="variable2">
+        <Variable.Default>
+          <VisualBasicValue x:TypeArguments="x:String" ExpressionText="“SampleText2“.ToLower()" />
+        </Variable.Default>
+      </Variable>
+      <Variable x:TypeArguments="x:String" Name="variable3">
+        <Variable.Default>
+          <VisualBasicValue x:TypeArguments="x:String" ExpressionText="“SampleText3“" />
+        </Variable.Default>
+      </Variable>
+      <Variable x:TypeArguments="x:String" Name="variable4">
+        <Variable.Default>
+          <Literal x:TypeArguments="x:String">SampleText4</Literal>
+        </Variable.Default>
+      </Variable>
+	  <Variable x:TypeArguments="x:String" Default="[“SampleText5“]" Name="variable5" />
+	  
+      <Variable x:TypeArguments="x:String" Name="variable6">
+        <Variable.Default>
+          <Literal x:TypeArguments="x:String">SampleText6““Special</Literal>
+        </Variable.Default>
+      </Variable>
+	  
     </Sequence.Variables>
     <sap:WorkflowViewStateService.ViewState>
       <scg:Dictionary x:TypeArguments="x:String, x:Object">
