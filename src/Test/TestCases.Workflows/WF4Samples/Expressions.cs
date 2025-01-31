@@ -108,10 +108,10 @@ Iterate ArrayList
         }
 
 
-        sealed class JustInTimeCompilerWrapper : JustInTimeCompiler
+        sealed class CompileSpecialCharactersHelperCompiler : JustInTimeCompiler
         {
             private JustInTimeCompiler _inner;
-            public JustInTimeCompilerWrapper(JustInTimeCompiler inner) { this._inner = inner; }
+            public CompileSpecialCharactersHelperCompiler(JustInTimeCompiler inner) { this._inner = inner; }
 
             public override LambdaExpression CompileExpression(ExpressionToCompile compilerRequest)
             {
@@ -135,7 +135,7 @@ Iterate ArrayList
         public void CompileSpecialCharacters()
         {
             var cf = VisualBasicSettings.Default.CompilerFactory;
-            VisualBasicSettings.Default.CompilerFactory = a => new JustInTimeCompilerWrapper(cf(a));
+            VisualBasicSettings.Default.CompilerFactory = a => new CompileSpecialCharactersHelperCompiler(cf(a));
             var activity = Compile(TestXamls.SpecialCharacters);
             var result = TestHelper.InvokeWorkflow(activity);
             VisualBasicSettings.Default.CompilerFactory = cf;
