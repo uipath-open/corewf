@@ -257,6 +257,11 @@ internal partial class ActivityExecutor : IEnlistmentNotification
         }
     }
 
+    public void ActivityStarted(ActivityInstance activityInstance)
+    {
+        _host.ActivityStarted(activityInstance);
+    }
+
     [DataMember(EmitDefaultValue = false)]
     public WorkflowIdentity WorkflowIdentity { get; internal set; }
 
