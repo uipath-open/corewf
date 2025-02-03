@@ -14,6 +14,9 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(RoslynPackageVersion)" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="TestData\CompilerMissingAssembly.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestData\JsonFileInstanceStore.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

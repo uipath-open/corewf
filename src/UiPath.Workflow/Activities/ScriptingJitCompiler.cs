@@ -70,6 +70,7 @@ public abstract class ScriptingJitCompiler : JustInTimeCompiler
             CompilerHelper.CreateExpressionCode(types, names, expressionToCompile.Code))));
 
         var collectibleAlc = new AssemblyLoadContext("ScriptingJit" + Guid.NewGuid(), true);
+        collectibleAlc.Resolving += CollectibleAlc_Resolving;
         using var scope = collectibleAlc.EnterContextualReflection();
 
         var results = TryBuild();
@@ -98,6 +99,16 @@ public abstract class ScriptingJitCompiler : JustInTimeCompiler
             }
 
         }
+    }
+
+    private Assembly CollectibleAlc_Resolving(AssemblyLoadContext loadContext, AssemblyName assemblyName)
+    {
+        // The assembly may have been loaded in a separate AssemblyLoadContext and should be available in the current AppDomain.
+        var assembly = AppDomain.CurrentDomain.GetAssemblies().LastOrDefault(a => a.FullName == assemblyName.FullName);
+        if (assembly != null)
+            return assembly;
+
+        return null;
     }
 
     public IEnumerable<string> GetIdentifiers(SyntaxTree syntaxTree)

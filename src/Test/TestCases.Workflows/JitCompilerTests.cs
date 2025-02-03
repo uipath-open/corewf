@@ -3,9 +3,11 @@ using System;
 using System.Activities;
 using System.Activities.ExpressionParser;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.Loader;
 using Xunit;
 
 namespace TestCases.Workflows
@@ -146,6 +148,24 @@ namespace TestCases.Workflows
 
             Assert.ThrowsAny<SourceExpressionException>(sut);
         }
+
+        [Fact]
+        public void CompileExpression_Can_Access_Assembly_Loaded_In_Other_Alc()
+        {
+            var testAssemblyPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"TestData\CompilerMissingAssembly.dll");
+            var loadContext = new AssemblyLoadContext("MyCollectibleALC");
+            var assembly = loadContext.LoadFromAssemblyPath(testAssemblyPath);
+
+            // Use the loaded assembly in the JitCompiler.
+            VbJitCompiler vbJitCompiler = new([typeof(string).Assembly, typeof(ClassWithIndexer).Assembly, typeof(Expression).Assembly, typeof(Enumerable).Assembly, assembly]);
+
+            List<string> namespaces = new List<string>(_namespaces);
+            namespaces.AddRange(["ClassLibrary1"]);
+
+            new Action(() => vbJitCompiler.CompileExpression(
+                new ExpressionToCompile("ClassLibrary1.Class1.Value", namespaces, (s, c) => null, typeof(string)))).ShouldNotThrow();
+        }
+
         private static Type VariableTypeGetter(string name, StringComparison stringComparison)
             => name switch
             {
