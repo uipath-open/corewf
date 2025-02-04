@@ -729,6 +729,16 @@ public abstract class WorkflowInstance
         }
     }
 
+    internal void ActivityStarted(ActivityInstance activityInstance)
+    {
+        OnActivityChange?.Invoke(activityInstance);
+    }
+
+    public delegate void OnActivityChangeHandler(ActivityInstance arg);
+
+    public event OnActivityChangeHandler OnActivityChange;
+
+
     //[SuppressMessage(FxCop.Category.Design, FxCop.Rule.NestedTypesShouldNotBeVisible,
     //    Justification = "these are effectively protected methods, but encapsulated in a struct to avoid naming conflicts")]
     protected struct WorkflowInstanceControl

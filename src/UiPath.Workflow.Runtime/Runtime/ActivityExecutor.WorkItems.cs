@@ -230,6 +230,8 @@ internal partial class ActivityExecutor
                 // synchronously.
                 ActivityInstance.SetInitializedSubstate(executor);
 
+                executor.ActivityStarted(ActivityInstance);
+
 #if NET45
                 if (executor.IsDebugged())
                 {
