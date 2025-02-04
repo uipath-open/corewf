@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xaml;
 using TestCases.Workflows.TestUtils;
@@ -106,6 +107,43 @@ Iterate ArrayList
             var activity = Compile(TestXamls.CSharpCalculation);
             TestHelper.InvokeWorkflow(activity, CSharpCalculationInputs).ShouldBe(CSharpCalculationResult);
         }
+
+        sealed class CompileSpecialCharactersHelperCompiler : JustInTimeCompiler
+        {
+            private JustInTimeCompiler _inner;
+
+            private static ThreadLocal<bool> _threadLocalEnabled = new ThreadLocal<bool>(() => false);
+
+            public static bool EnabledOnCurrentThread
+            {
+                get => _threadLocalEnabled.Value;
+                set => _threadLocalEnabled.Value = value;
+            }
+
+
+            public CompileSpecialCharactersHelperCompiler(JustInTimeCompiler inner) { this._inner = inner; }
+
+            public override LambdaExpression CompileExpression(ExpressionToCompile compilerRequest)
+            {
+                if (EnabledOnCurrentThread)
+                    throw new InvalidOperationException($"JIT compilation is disabled for non-Legacy projects. {compilerRequest} should have been compiled by the Studio Compiler.");
+                return _inner.CompileExpression(compilerRequest);
+            }
+        }
+
+        //https://uipath.atlassian.net/browse/ROBO-4469 Checks that an xaml WF with special characters can be compiled, and doesn't need JIT.
+        [Fact]
+        public void CompileSpecialCharacters()
+        {
+            var cf = VisualBasicSettings.Default.CompilerFactory;
+            CompileSpecialCharactersHelperCompiler.EnabledOnCurrentThread = true;
+            VisualBasicSettings.Default.CompilerFactory = a => new CompileSpecialCharactersHelperCompiler(cf(a));
+            var activity = Compile(TestXamls.SpecialCharacters);
+            var result = TestHelper.InvokeWorkflow(activity);
+            VisualBasicSettings.Default.CompilerFactory = cf;
+        }
+
+
         [Fact]
         public void CSharpCalculation()
         {
