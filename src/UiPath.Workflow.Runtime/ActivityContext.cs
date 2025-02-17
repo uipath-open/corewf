@@ -23,10 +23,7 @@ public class ActivityContext
     {
         Fx.Assert(instance != null, "valid activity instance is required");
 
-        _instance = instance;
-        _executor = executor;
-        Activity = _instance.Activity;
-        _instanceId = instance.InternalId;
+        Reinitialize(instance, executor);
     }
 
     internal LocationEnvironment Environment
@@ -110,6 +107,7 @@ public class ActivityContext
         _executor = executor;
         Activity = activity;
         _instanceId = instanceId;
+        executor.GetExtension<IExecutingActivityTracker>()?.OnActivityContextReinitialized(this);
     }
 
     // extra insurance against misuse (if someone stashes away the execution context to use later)
